@@ -12,6 +12,7 @@ Amazon Alexa Skill to Book Restaurants
 
 -> Generate audio from information from payload -> Call with twilio and leave voicemail automatically
 
+-> Function to make Amazon Polly mp3 of the specified message -> Sends to our backend to create a TWIML thing -> sends twiml url to twilio to make call
 
 ## Flow
 
