@@ -52,6 +52,7 @@ def extract_lat_long(event, context):
 		returnVal = res["city"] + " " + res['stateOrRegion']
 	except:
 		returnVal = DEFAULT_LOCATION
+	return returnVal
 
 def on_intent(intent_request, session, location):
 	print(intent_request)
