@@ -1,4 +1,5 @@
 import responses
+import echo
 
 def returnSpeech(speech, endSession=True):
 	return {
@@ -23,7 +24,9 @@ def on_intent(intent_request, session):
 		return responses.what_day()
 		# Return the response for what day
 	elif intent_name == 'pleaseBook':
-		return "You are trying to book a table at {}".format(intent_request["intent"]["slots"]["restaraunt"]["value"])
+		restaraunt = intent_request["intent"]["slots"]["restaraunt"]["value"]
+		
+		return echo.create_upload_text(restaraunt)
 		return "Called please book"
 
 
