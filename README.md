@@ -14,5 +14,7 @@ Amazon Alexa Skill to Book Restaurants
 
 -> Function to make Amazon Polly mp3 of the specified message -> Sends to our backend to create a TWIML thing -> sends twiml url to twilio to make call
 
+Create {uuid}.twiml and {uuid}.mp3 file and upload to s3 adn serve s3 file back
+
 ## Flow
 

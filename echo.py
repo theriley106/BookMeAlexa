@@ -1,8 +1,6 @@
 
 import json
 # This is primarily used for using the supported language list
-import shutil
-# This is used to copy ffmpeg to executable path
 import random
 # This is used for picking a random language when it's not specified
 import stat
@@ -17,6 +15,7 @@ import random
 import boto3
 from contextlib import closing
 from twilio.rest import Client
+import os
 
 account_sid = TWILIO_ID
 auth_token = TWILIO_AUTH
@@ -106,6 +105,7 @@ def create_upload_text(restaraunt):
 	create_mp3(text, uuid)
 	create_twiml(uuid)
 	make_call("8645674106", uuid)
+	os.system('rm {}*'.format(uuid))
 
 
 if __name__ == '__main__':
