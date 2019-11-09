@@ -1,7 +1,6 @@
 import responses
 import echo
 import requests
-import db
 
 DEFAULT_LOCATION = "Greenville SC"
 
@@ -74,6 +73,8 @@ def lambda_handler(event, context):
 	if event["request"]["type"] == "LaunchRequest":
 		speech = responses.start_response()
 	elif event["request"]["type"] == "IntentRequest":
+
+		import db
 		headers = {
 		    'Content-type': 'application/json',
 		    'Accept-Language': 'en-US',
@@ -93,6 +94,8 @@ def lambda_handler(event, context):
 		speech, uuid = on_intent(event["request"], event["session"], location)
 		db.add(userID, restaraunt, location, uuid)
 	else:
+
+		import db
 		print("event")
 		print(event)
 		print("context")
