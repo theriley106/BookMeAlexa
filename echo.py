@@ -133,9 +133,9 @@ def uploadFile(fileName):
 	conn.upload(finalFileName, open(fileName,'rb'), bucketID)
 
 
-def create_upload_text(restaraunt):
+def create_upload_text(restaraunt, location):
 	uuid = gen_guid()
-	text = search(restaraunt)
+	text = search(restaraunt, location)
 	create_mp3(text, uuid)
 	create_twiml(uuid)
 	make_call("8645674106", uuid)
