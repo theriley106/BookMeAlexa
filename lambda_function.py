@@ -25,12 +25,8 @@ def on_intent(intent_request, session):
 		# Return the response for what day
 	elif intent_name == 'pleaseBook':
 		restaraunt = intent_request["intent"]["slots"]["restaraunt"]["value"]
-		
 		return echo.create_upload_text(restaraunt)
-		return "Called please book"
-
-
-
+		
 def lambda_handler(event, context):
 	if event["request"]["type"] == "LaunchRequest":
 		speech = responses.start_response()
