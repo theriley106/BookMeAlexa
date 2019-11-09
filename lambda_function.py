@@ -1,6 +1,7 @@
 import responses
 import echo
 import requests
+import db
 
 DEFAULT_LOCATION = "Greenville SC"
 
@@ -61,7 +62,7 @@ def on_intent(intent_request, session, location):
 	# This is the name of the intent (Defined in the Alexa Skill Kit)
 	if intent_name == 'whatDay':
 		# whatDay intent
-		return responses.what_day()
+		return responses.what_day(), None
 		# Return the response for what day
 	elif intent_name == 'pleaseBook':
 		restaraunt = intent_request["intent"]["slots"]["restaraunt"]["value"]
@@ -69,6 +70,7 @@ def on_intent(intent_request, session, location):
 		
 def lambda_handler(event, context):
 	purchaseID = None
+	userID = event['session']['user']['userId']
 	if event["request"]["type"] == "LaunchRequest":
 		speech = responses.start_response()
 	elif event["request"]["type"] == "IntentRequest":
@@ -87,13 +89,19 @@ def lambda_handler(event, context):
 		print(productResponse)
 		location = extract_lat_long(event, context)
 		purchaseID = productResponse['inSkillProducts'][0]['productId']
-		speech = on_intent(event["request"], event["session"], location)
+		restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
+		speech, uuid = on_intent(event["request"], event["session"], location)
+		db.add(userID, restaraunt, location, uuid)
 	else:
 		print("event")
 		print(event)
 		print("context")
 		print(context)
 		speech = "AYY THIS WORKED I THINK"
+		print("DB")
+		print(db.get_user(userID))
+		echo.make_call("8645674106", db.get_user(userID))
+		speech = "USER ID IS {}".format(userID)
 	x = returnSpeech(speech, product=purchaseID)
 	print(x)
 	return x
