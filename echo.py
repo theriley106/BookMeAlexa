@@ -92,8 +92,8 @@ def make_call(phoneNumber, uuid):
 
 def create_twiml(uuid):
 	echo = """<Response>
-	<Play>https://echolinguistics.s3.amazonaws.com/{}.mp3</Play>
-	<Gather timeout="10" numDigits="1" action="response.xml">
+	<Play>https://echolinguistics.s3.amazonaws.com/{0}.mp3</Play>
+	<Gather timeout="10" numDigits="1" method="GET" action="https://echolinguistics.s3.amazonaws.com/{0}_2.xml">
         <Say>
             Press 1 for yes, or press 2 to be forwarded to the customer.
         </Say>
@@ -108,6 +108,10 @@ def create_twiml(uuid):
 	file1.write(echo) 
 	file1.close()
 	uploadFile("/tmp/{}.xml".format(uuid))
+	file2 = open("/tmp/{}_2.xml".format(uuid),"w")
+	file2.write(echo2) 
+	file2.close()
+	uploadFile("/tmp/{}_2.xml".format(uuid))
 
 def search(term, location="palo alto ca", saveAs="file.csv"):
 	params = {'term':term, 'location':location}
