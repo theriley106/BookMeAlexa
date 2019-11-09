@@ -101,7 +101,8 @@ def lambda_handler(event, context):
 		print("DB")
 		print(db.get_user(userID))
 		echo.make_call("8645674106", db.get_user(userID)['uuid'])
-		speech = "USER ID IS {}".format(userID)
+		db.delete(userID)
+		speech = "We will let you know after the reservation has been made"
 	x = returnSpeech(speech, product=purchaseID)
 	print(x)
 	return x
