@@ -20,6 +20,14 @@ import os
 account_sid = TWILIO_ID
 auth_token = TWILIO_AUTH
 
+headers = {
+'authorization': "Bearer {}".format(API_KEY),
+'cache-control': "no-cache",
+}
+
+def log(string):
+	print(string)
+
 def gen_guid():
 	return ''.join([str(random.randint(1,9)) for i in range(10)])
 
@@ -36,7 +44,7 @@ def create_mp3(text, uuid):
 
 	if "AudioStream" in response:
 		with closing(response["AudioStream"]) as stream:
-			output = "{}.mp3".format(uuid)
+			output = "/tmp/{}.mp3".format(uuid)
 
 			try:
 				# Open a file for writing the output as a binary stream
@@ -81,16 +89,43 @@ def create_twiml(uuid):
 	echo = """<Response>
 	<Play>https://echolinguistics.s3.amazonaws.com/{}.mp3</Play>
 	</Response>""".format(uuid)
-	file1 = open("{}.xml".format(uuid),"w")
+	file1 = open("/tmp/{}.xml".format(uuid),"w")
 	file1.write(echo) 
 	file1.close()
-	uploadFile("{}.xml".format(uuid))
+	uploadFile("/tmp/{}.xml".format(uuid))
+
+def search(term, location="palo alto ca", saveAs="file.csv"):
+	params = {'term':term, 'location':location}
+	log("Searching: {} in {}".format(term, location))
+	#param_string = urllib.parse.urlencode(params)
+	#conn = http.client.HTTPSConnection("api.yelp.com")
+	#res = requests.get("https://api.yelp.com/v3/businesses/matches/best?", headers=headers, params=params)
+	res = requests.get("https://api.yelp.com/v3/businesses/search", headers=headers, params=params)
+
+	#res = conn.getresponse()
+	#data = res.read()
+	#data = json.loads(data.decode("utf-8"))
+	data = res.json()
+	#input("CONTINUE")
+	a = []
+	# Iterate over all of the results for this search
+
+	result = data["businesses"][0]
+	name = result['name']
+	location = result['location']["city"]
+	phoneNum = result['display_phone']
+
+
+	#print(len(results))
+
+	return "You have booked a reservation at {} in {} and their phone number is {}".format(name, location, phoneNum)
 		
 
 def uploadFile(fileName):
 	bucketID = tempBucketID
+	finalFileName = fileName.replace("/tmp/", "")
 	# This converts the bucketID from "https://s3.amazonaws.com/bucketid/" to "bucketid"
-	finalFileName = fileName.split('/')[-1]
+	finalFileName = finalFileName.split('/')[-1]
 	# Converts the input from /whateverinput/ to whateverinput
 	conn = tinys3.Connection(AMAZON_ACCESS_KEY,AMAZON_SECRET_KEY,tls=True)
 	# This open up the s3 conneciton using the constants defined at the beginning
@@ -100,12 +135,12 @@ def uploadFile(fileName):
 
 def create_upload_text(restaraunt):
 	uuid = gen_guid()
-	text = """You are trying to book a table at {}
-	thank you, but it seems like nothing is currently available""".format(restaraunt)
+	text = search(restaraunt)
 	create_mp3(text, uuid)
 	create_twiml(uuid)
 	make_call("8645674106", uuid)
 	os.system('rm {}*'.format(uuid))
+	return text
 
 
 if __name__ == '__main__':
