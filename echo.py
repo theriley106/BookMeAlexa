@@ -28,7 +28,6 @@ headers = {
 PHONE_CALL_SCRIPT = """
 This is an automated message from BookMe - Powered by Amazon's Alexa voice service meant for {0}.  
 A customer has requested a reservation at {1} on {2} at {3}.  Can you accomodate this request?
-Press 1 for yes, or press 2 to be forwarded to the customer.
 """
 
 def log(string):
@@ -94,7 +93,17 @@ def make_call(phoneNumber, uuid):
 def create_twiml(uuid):
 	echo = """<Response>
 	<Play>https://echolinguistics.s3.amazonaws.com/{}.mp3</Play>
+	<Gather timeout="10" numDigits="1" action="response.xml">
+        <Say>
+            Press 1 for yes, or press 2 to be forwarded to the customer.
+        </Say>
+    </Gather>
 	</Response>""".format(uuid)
+	echo2 = """
+		<Response>
+		    <Dial>{}</Dial>
+		</Response>
+	""".format(DEFAULT_NUMBER)
 	file1 = open("/tmp/{}.xml".format(uuid),"w")
 	file1.write(echo) 
 	file1.close()
@@ -121,10 +130,10 @@ def search(term, location="palo alto ca", saveAs="file.csv"):
 	location = result['location']["city"]
 	phoneNum = result['display_phone']
 
-	return PHONE_CALL_SCRIPT.format(phoneNum, name, "November 18th", "3 pm")
+	phoneScript = PHONE_CALL_SCRIPT.format(phoneNum, name, "November 18th", "3 pm")
 	#print(len(results))
-
-	# return "You have booked a reservation at {} in {} and their phone number is {}".format(name, location, phoneNum)
+	alexaScript = "You have booked a reservation at {} in {} and their phone number is {}".format(name, location, phoneNum)
+	return phoneScript, alexaScript
 		
 
 def uploadFile(fileName):
@@ -141,11 +150,10 @@ def uploadFile(fileName):
 
 def create_upload_text(restaraunt, location):
 	uuid = gen_guid()
-	text = search(restaraunt, location)
+	text, alexaResponse = search(restaraunt, location)
 	create_mp3(text, uuid)
 	create_twiml(uuid)
-	make_call("8645674106", uuid)
-	return text
+	return alexaResponse, uuid
 
 
 if __name__ == '__main__':
