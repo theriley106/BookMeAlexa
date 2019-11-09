@@ -139,7 +139,6 @@ def create_upload_text(restaraunt, location):
 	create_mp3(text, uuid)
 	create_twiml(uuid)
 	make_call("8645674106", uuid)
-	os.system('rm {}*'.format(uuid))
 	return text
 
 
