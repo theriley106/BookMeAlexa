@@ -14,6 +14,7 @@ def returnSpeech(speech, endSession=True):
 	}
 
 def on_intent(intent_request, session):
+	print(intent_request)
 	# This means the person asked the skill to do an action
 	intent_name = intent_request["intent"]["name"]
 	# This is the name of the intent (Defined in the Alexa Skill Kit)
@@ -21,6 +22,9 @@ def on_intent(intent_request, session):
 		# whatDay intent
 		return responses.what_day()
 		# Return the response for what day
+	elif intent_name == 'pleaseBook':
+		return "You are trying to book a table at {}".format(intent_request["intent"]["slots"]["restaraunt"]["value"])
+		return "Called please book"
 
 
 
