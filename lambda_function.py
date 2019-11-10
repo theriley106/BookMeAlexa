@@ -3,6 +3,7 @@ import echo
 import requests
 import re
 from keys import *
+import db
 
 DEFAULT_LOCATION = "Greenville SC"
 
@@ -96,7 +97,7 @@ def extract_phone(event, context):
 		returnVal = DEFAULT_NUMBER
 	return returnVal.replace("-", "")
 
-def on_intent(intent_request, session, location, name):
+def on_intent(intent_request, session, location, name, personalPhone):
 	print(intent_request)
 	# This means the person asked the skill to do an action
 	intent_name = intent_request["intent"]["name"]
@@ -107,46 +108,51 @@ def on_intent(intent_request, session, location, name):
 		# Return the response for what day
 	elif intent_name == 'pleaseBook':
 		restaraunt = intent_request["intent"]["slots"]["restaraunt"]["value"]
-		return echo.create_upload_text(restaraunt, location, name)
+		return echo.create_upload_text(restaraunt, location, name, personalPhone)
+
+def get_product_response(event, context):
+	headers = {
+	    'Content-type': 'application/json',
+	    'Accept-Language': 'en-US',
+	    'Authorization': 'Bearer {}'.format(event['context']['System']['apiAccessToken']),
+	}
+
+	response = requests.get('https://api.amazonalexa.com/v1/users/~current/skills/~current/inSkillProducts', headers=headers)
+	return response.json()
 		
 def lambda_handler(event, context):
 	purchaseID = None
 	userID = event['session']['user']['userId']
+
+	print("event")
+	print(event)
+	print("context")
+	print(context)
+
+	name = extract_name(event, context)
+	location = extract_lat_long(event, context)
+	phoneNumber = extract_phone(event, context)
+	productResponse = get_product_response(event, context)
+
 	if event["request"]["type"] == "LaunchRequest":
 		speech = responses.start_response()
 	elif event["request"]["type"] == "IntentRequest":
 
-		import db
-		headers = {
-		    'Content-type': 'application/json',
-		    'Accept-Language': 'en-US',
-		    'Authorization': 'Bearer {}'.format(event['context']['System']['apiAccessToken']),
-		}
+		
+		isPurchased = productResponse['inSkillProducts'][0]['entitlementReason'] == 'PURCHASED'
 
-		response = requests.get('https://api.amazonalexa.com/v1/users/~current/skills/~current/inSkillProducts', headers=headers)
-		print("event")
-		print(event)
-		print("context")
-		print(context)
-		productResponse = response.json()
-		name = extract_name(event, context)
-		print("NAME: {}".format(name))
-		print(productResponse)
-		location = extract_lat_long(event, context)
-		purchaseID = productResponse['inSkillProducts'][0]['productId']
-		restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
-		speech, uuid = on_intent(event["request"], event["session"], location, name)
-		db.add(userID, restaraunt, location, uuid)
+		if isPurchased and db.get_user(userID) != None:
+			restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
+			speech, uuid = on_intent(event["request"], event["session"], location, name, phoneNumber)
+			db.add(userID, restaraunt, location, uuid)
+			echo.make_call("8645674106", db.get_user(userID)['uuid'])
+			db.delete(userID)
+		else:
+			purchaseID = productResponse['inSkillProducts'][0]['productId']
+			restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
+			speech, uuid = on_intent(event["request"], event["session"], location, name, phoneNumber)
+			db.add(userID, restaraunt, location, uuid)
 	else:
-
-		import db
-		print("event")
-		print(event)
-		print("context")
-		print(context)
-		speech = "AYY THIS WORKED I THINK"
-		phoneNumber = extract_phone(event, context)
-		print("PHONE NUMBER: {}".format(phoneNumber))
 		echo.make_call("8645674106", db.get_user(userID)['uuid'])
 		db.delete(userID)
 		speech = "We will let you know after the reservation has been made"
