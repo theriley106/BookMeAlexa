@@ -26,8 +26,7 @@ headers = {
 }
 
 PHONE_CALL_SCRIPT = """
-This is an automated message from BookMe - Powered by Amazon's Alexa voice service meant for {0}.  
-A customer has requested a reservation at {1} on {2} at {3}.  Can you accomodate this request?
+I am calling on behalf of {0} who has requested a reservation at {1} on {2} at {3}.
 Press the pound sign to confirm this reservation, or 2 to be forwarded to the customer.
 """
 
@@ -93,9 +92,14 @@ def make_call(phoneNumber, uuid):
 
 def create_twiml(uuid):
 	echo = """<Response>
-	<Play>https://echolinguistics.s3.amazonaws.com/{0}.mp3</Play>
-	<Gather timeout="5" numDigits="1" method="GET" action="https://echolinguistics.s3.amazonaws.com/{0}_2.xml">
+	<Play>https://echolinguistics.s3.amazonaws.com/welcome.mp3</Play>
+	<Gather timeout="10" numDigits="1" method="GET" action="https://echolinguistics.s3.amazonaws.com/{0}_2.xml">
     </Gather>
+	<Play>https://echolinguistics.s3.amazonaws.com/{0}.mp3</Play>
+	<Gather timeout="10" numDigits="1" method="GET" action="https://echolinguistics.s3.amazonaws.com/{0}_2.xml">
+    </Gather>
+    <Play>https://echolinguistics.s3.amazonaws.com/ending.mp3</Play>
+    <Pause length="1"/>
 	</Response>""".format(uuid)
 	echo2 = """
 		<Response>
@@ -111,7 +115,7 @@ def create_twiml(uuid):
 	file2.close()
 	uploadFile("/tmp/{}_2.xml".format(uuid))
 
-def search(term, location="palo alto ca", saveAs="file.csv"):
+def search(term, location="palo alto ca", customerName=None, saveAs="file.csv"):
 	params = {'term':term, 'location':location}
 	log("Searching: {} in {}".format(term, location))
 	#param_string = urllib.parse.urlencode(params)
@@ -132,7 +136,7 @@ def search(term, location="palo alto ca", saveAs="file.csv"):
 	location = result['location']["city"]
 	phoneNum = result['display_phone']
 
-	phoneScript = PHONE_CALL_SCRIPT.format(phoneNum, name, "November 18th", "3 pm")
+	phoneScript = PHONE_CALL_SCRIPT.format(customerName, name, "November 18th", "3 pm")
 	#print(len(results))
 	alexaScript = "You have booked a reservation at {} in {} and their phone number is {}".format(name, location, phoneNum)
 	return phoneScript, alexaScript
@@ -150,16 +154,21 @@ def uploadFile(fileName):
 	conn.upload(finalFileName, open(fileName,'rb'), bucketID)
 
 
-def create_upload_text(restaraunt, location):
+def create_upload_text(restaraunt, location, name):
 	uuid = gen_guid()
-	text, alexaResponse = search(restaraunt, location)
+	text, alexaResponse = search(restaraunt, location, name)
 	create_mp3(text, uuid)
 	create_twiml(uuid)
 	return alexaResponse, uuid
 
 
 if __name__ == '__main__':
-	create_upload_text("veggie grille")
+	# create_upload_text("veggie grille")
+	text = """
+	Thank you for confirming this reservation through BookMe!  
+	We will contact the customer with a confirmation.  Goodbye.
+	"""
+	create_mp3(text, "ending")
 
 ######### This runs anytime echoLinguistics.py is imported  #######################
 # createmp3List()
