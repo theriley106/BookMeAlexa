@@ -1,7 +1,7 @@
 def start_response():
 	# This is the speech that is said when the skill starts for the first time
 	return """Thank you for checking out Book Me.  An Amazon Alexa skill that can 
-	book reservations at any local restaraunt.
+	book reservations at any local restaurant -- even those without online booking systems.
 	"""
 
 def what_day():
