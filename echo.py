@@ -90,7 +90,7 @@ def make_call(phoneNumber, uuid):
 
 	print(call.sid)
 
-def create_twiml(uuid):
+def create_twiml(uuid, personalPhone):
 	echo = """<Response>
 	<Play>https://echolinguistics.s3.amazonaws.com/welcome.mp3</Play>
 	<Gather timeout="10" numDigits="1" method="GET" action="https://echolinguistics.s3.amazonaws.com/{0}_2.xml">
@@ -105,7 +105,7 @@ def create_twiml(uuid):
 		<Response>
 		    <Dial>{}</Dial>
 		</Response>
-	""".format(DEFAULT_NUMBER)
+	""".format(personalPhone)
 	file1 = open("/tmp/{}.xml".format(uuid),"w")
 	file1.write(echo) 
 	file1.close()
@@ -138,10 +138,7 @@ def search(term, location="palo alto ca", customerName=None, saveAs="file.csv"):
 
 	phoneScript = PHONE_CALL_SCRIPT.format(customerName, name, "November 18th", "3 pm")
 	#print(len(results))
-	if name.lower() != term.lower():
-		alexaScript = "We did not find an exact match, but we found {} in {}".format(name, location)
-	else:
-		alexaScript = "We will book a reservation at {} in {}".format(name, location)
+	alexaScript = "The closest match we could find was {} in {}".format(name, location)
 	return phoneScript, alexaScript
 		
 
@@ -157,11 +154,11 @@ def uploadFile(fileName):
 	conn.upload(finalFileName, open(fileName,'rb'), bucketID)
 
 
-def create_upload_text(restaraunt, location, name):
+def create_upload_text(restaraunt, location, name, personalPhone):
 	uuid = gen_guid()
 	text, alexaResponse = search(restaraunt, location, name)
 	create_mp3(text, uuid)
-	create_twiml(uuid)
+	create_twiml(uuid, personalPhone)
 	return alexaResponse, uuid
 
 
