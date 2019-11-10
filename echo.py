@@ -138,7 +138,10 @@ def search(term, location="palo alto ca", customerName=None, saveAs="file.csv"):
 
 	phoneScript = PHONE_CALL_SCRIPT.format(customerName, name, "November 18th", "3 pm")
 	#print(len(results))
-	alexaScript = "You have booked a reservation at {} in {} and their phone number is {}".format(name, location, phoneNum)
+	if name.lower() != term.lower():
+		alexaScript = "We did not find an exact match, but we found {} in {}".format(name, location)
+	else:
+		alexaScript = "We will book a reservation at {} in {}".format(name, location)
 	return phoneScript, alexaScript
 		
 
