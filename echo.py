@@ -28,6 +28,7 @@ headers = {
 PHONE_CALL_SCRIPT = """
 This is an automated message from BookMe - Powered by Amazon's Alexa voice service meant for {0}.  
 A customer has requested a reservation at {1} on {2} at {3}.  Can you accomodate this request?
+Press the pound sign to confirm this reservation, or 2 to be forwarded to the customer.
 """
 
 def log(string):
@@ -93,10 +94,7 @@ def make_call(phoneNumber, uuid):
 def create_twiml(uuid):
 	echo = """<Response>
 	<Play>https://echolinguistics.s3.amazonaws.com/{0}.mp3</Play>
-	<Gather timeout="10" numDigits="1" method="GET" action="https://echolinguistics.s3.amazonaws.com/{0}_2.xml">
-        <Say>
-            Press 1 for yes, or press 2 to be forwarded to the customer.
-        </Say>
+	<Gather timeout="5" numDigits="1" method="GET" action="https://echolinguistics.s3.amazonaws.com/{0}_2.xml">
     </Gather>
 	</Response>""".format(uuid)
 	echo2 = """
