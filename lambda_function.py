@@ -4,6 +4,7 @@ import requests
 import re
 from keys import *
 import db
+import notify
 
 DEFAULT_LOCATION = "Greenville SC"
 
@@ -142,6 +143,8 @@ def lambda_handler(event, context):
 	print(event)
 	print("context")
 	print(context)
+
+	notify.send_notification(userID)
 
 	name = extract_name(event, context)
 	location = extract_lat_long(event, context)
