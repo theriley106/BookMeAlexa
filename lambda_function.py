@@ -1,6 +1,8 @@
 import responses
 import echo
 import requests
+import re
+from keys import *
 
 DEFAULT_LOCATION = "Greenville SC"
 
@@ -54,7 +56,47 @@ def extract_lat_long(event, context):
 		returnVal = DEFAULT_LOCATION
 	return returnVal
 
-def on_intent(intent_request, session, location):
+def extract_name(event, context):
+	try:
+		try:
+			deviceID = event["context"]["System"]['device']['deviceId']
+		except:
+			deviceID = "Test"
+		try:
+			key = event["context"]["System"]['apiAccessToken']
+		except:
+			key = ""
+			deviceID = "Test"
+		# This returns a dictionary object
+		headers = {'Host': 'api.amazonalexa.com', 'Accept': 'application/json', 'Authorization': "Bearer {}".format(key)}
+		url = "https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name"
+		name = requests.get(url, headers=headers).text
+		returnVal = name
+	except:
+		returnVal = DEFAULT_NAME
+	return returnVal.replace('"', '')
+
+def extract_phone(event, context):
+	try:
+		try:
+			deviceID = event["context"]["System"]['device']['deviceId']
+		except:
+			deviceID = "Test"
+		try:
+			key = event["context"]["System"]['apiAccessToken']
+		except:
+			key = ""
+			deviceID = "Test"
+		# This returns a dictionary object
+		headers = {'Host': 'api.amazonalexa.com', 'Accept': 'application/json', 'Authorization': "Bearer {}".format(key)}
+		url = "https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name"
+		phoneNum = requests.get(url, headers=headers).json()
+		returnVal = phoneNum["phoneNumber"]
+	except:
+		returnVal = DEFAULT_NUMBER
+	return returnVal.replace("-", "")
+
+def on_intent(intent_request, session, location, name):
 	print(intent_request)
 	# This means the person asked the skill to do an action
 	intent_name = intent_request["intent"]["name"]
@@ -65,7 +107,7 @@ def on_intent(intent_request, session, location):
 		# Return the response for what day
 	elif intent_name == 'pleaseBook':
 		restaraunt = intent_request["intent"]["slots"]["restaraunt"]["value"]
-		return echo.create_upload_text(restaraunt, location)
+		return echo.create_upload_text(restaraunt, location, name)
 		
 def lambda_handler(event, context):
 	purchaseID = None
@@ -87,11 +129,13 @@ def lambda_handler(event, context):
 		print("context")
 		print(context)
 		productResponse = response.json()
+		name = extract_name(event, context)
+		print("NAME: {}".format(name))
 		print(productResponse)
 		location = extract_lat_long(event, context)
 		purchaseID = productResponse['inSkillProducts'][0]['productId']
 		restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
-		speech, uuid = on_intent(event["request"], event["session"], location)
+		speech, uuid = on_intent(event["request"], event["session"], location, name)
 		db.add(userID, restaraunt, location, uuid)
 	else:
 
@@ -101,8 +145,8 @@ def lambda_handler(event, context):
 		print("context")
 		print(context)
 		speech = "AYY THIS WORKED I THINK"
-		print("DB")
-		print(db.get_user(userID))
+		phoneNumber = extract_phone(event, context)
+		print("PHONE NUMBER: {}".format(phoneNumber))
 		echo.make_call("8645674106", db.get_user(userID)['uuid'])
 		db.delete(userID)
 		speech = "We will let you know after the reservation has been made"
