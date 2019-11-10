@@ -77,6 +77,20 @@ def extract_name(event, context):
 		returnVal = DEFAULT_NAME
 	return returnVal.replace('"', '')
 
+def convert_time(value):
+	minutes = 0
+	if ':' in str(value):
+		value, minutes = value.split(":")
+	partOfDay = " AM"
+	if int(value) > 12:
+		partOfDay = " PM"
+		value = int(value) - 12
+	timeVal = str(value)
+	if int(minutes) > 0:
+		timeVal += " {}".format(minutes)
+	timeVal += partOfDay
+	return timeVal
+
 def extract_phone(event, context):
 	try:
 		try:
@@ -97,7 +111,7 @@ def extract_phone(event, context):
 		returnVal = DEFAULT_NUMBER
 	return returnVal.replace("-", "")
 
-def on_intent(intent_request, session, location, name, personalPhone):
+def on_intent(intent_request, session, location, name, personalPhone, dateVal, timeVal):
 	print(intent_request)
 	# This means the person asked the skill to do an action
 	intent_name = intent_request["intent"]["name"]
@@ -108,7 +122,7 @@ def on_intent(intent_request, session, location, name, personalPhone):
 		# Return the response for what day
 	elif intent_name == 'pleaseBook':
 		restaraunt = intent_request["intent"]["slots"]["restaraunt"]["value"]
-		return echo.create_upload_text(restaraunt, location, name, personalPhone)
+		return echo.create_upload_text(restaraunt, location, name, personalPhone, dateVal, convert_time(timeVal))
 
 def get_product_response(event, context):
 	headers = {
@@ -150,7 +164,9 @@ def lambda_handler(event, context):
 		else:
 			purchaseID = productResponse['inSkillProducts'][0]['productId']
 			restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
-			speech, uuid = on_intent(event["request"], event["session"], location, name, phoneNumber)
+			dateVal = event["request"]["intent"]["slots"]["dateVal"]["value"]
+			timeVal = event["request"]["intent"]["slots"]["timeVal"]["value"]
+			speech, uuid = on_intent(event["request"], event["session"], location, name, phoneNumber, dateVal, timeVal)
 			db.add(userID, restaraunt, location, uuid)
 	else:
 		echo.make_call("8645674106", db.get_user(userID)['uuid'])
