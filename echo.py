@@ -115,7 +115,7 @@ def create_twiml(uuid, personalPhone):
 	file2.close()
 	uploadFile("/tmp/{}_2.xml".format(uuid))
 
-def search(term, location="palo alto ca", customerName=None, saveAs="file.csv"):
+def search(term, location="palo alto ca", customerName=None, dateVal=None, timeVal=None, saveAs="file.csv"):
 	params = {'term':term, 'location':location}
 	log("Searching: {} in {}".format(term, location))
 	#param_string = urllib.parse.urlencode(params)
@@ -136,7 +136,7 @@ def search(term, location="palo alto ca", customerName=None, saveAs="file.csv"):
 	location = result['location']["city"]
 	phoneNum = result['display_phone']
 
-	phoneScript = PHONE_CALL_SCRIPT.format(customerName, name, "November 18th", "3 pm")
+	phoneScript = PHONE_CALL_SCRIPT.format(customerName, name, dateVal, timeVal)
 	#print(len(results))
 	alexaScript = "The closest match we could find was {} in {}".format(name, location)
 	return phoneScript, alexaScript
@@ -154,9 +154,9 @@ def uploadFile(fileName):
 	conn.upload(finalFileName, open(fileName,'rb'), bucketID)
 
 
-def create_upload_text(restaraunt, location, name, personalPhone):
+def create_upload_text(restaraunt, location, name, personalPhone, dateVal, timeVal):
 	uuid = gen_guid()
-	text, alexaResponse = search(restaraunt, location, name)
+	text, alexaResponse = search(restaraunt, location, name, dateVal, timeVal)
 	create_mp3(text, uuid)
 	create_twiml(uuid, personalPhone)
 	return alexaResponse, uuid
