@@ -33,4 +33,4 @@ if __name__ == '__main__':
 	read()
 	print("\n\nNEW\n\n")
 	read()
-	print get_user('chris')
+	print get_user('asdfadsfasdfchris')
