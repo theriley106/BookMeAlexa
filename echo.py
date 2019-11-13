@@ -139,7 +139,7 @@ def search(term, location="palo alto ca", customerName=None, dateVal=None, timeV
 	phoneScript = PHONE_CALL_SCRIPT.format(customerName, name, dateVal, timeVal)
 	#print(len(results))
 	alexaScript = "The closest match we could find was {} in {}".format(name, location)
-	return phoneScript, alexaScript
+	return phoneScript, alexaScript, phoneNum
 		
 
 def uploadFile(fileName):
@@ -156,10 +156,10 @@ def uploadFile(fileName):
 
 def create_upload_text(restaraunt, location, name, personalPhone, dateVal, timeVal):
 	uuid = gen_guid()
-	text, alexaResponse = search(restaraunt, location, name, dateVal, timeVal)
+	text, alexaResponse, phoneNum = search(restaraunt, location, name, dateVal, timeVal)
 	create_mp3(text, uuid)
 	create_twiml(uuid, personalPhone)
-	return alexaResponse, uuid
+	return alexaResponse, uuid, phoneNum
 
 
 if __name__ == '__main__':
