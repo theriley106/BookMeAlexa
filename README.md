@@ -1,4 +1,4 @@
-<h2 align="center"><a href="https://www.youtube.com/watch?v=oCiOAlz5b8w">Watch the Video Demo</a></h2>
+<h1 align="center"><a href="https://www.youtube.com/watch?v=oCiOAlz5b8w">Watch the Video Demo</a></h1>
 
 <h2 align="center"><a href="https://devpost.com/software/book-me-ro24lj">View the Devpost Project</a></h2>
 
