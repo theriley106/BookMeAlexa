@@ -1,3 +1,7 @@
+<h2 align="center"><a href="https://www.youtube.com/watch?v=oCiOAlz5b8w">Watch the Video Demo</a></h2>
+
+<h2 align="center"><a href="https://youtu.be/p0hbONMGPN8">View the Devpost Project</a></h2>
+
 ## What it does
 
 **Book Me enables users to book reservations at *any* local restaurant using their Amazon Alexa by placing an automated phone call on their behalf.**
