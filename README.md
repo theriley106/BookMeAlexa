@@ -53,4 +53,4 @@ Our Costs: **~$0.02**
 
 Total Profit: **~$0.67/call**
 
-<h2 align="center"><a href="https://devpost.com/software/book-me-ro24lj">View the Devpost Project</a></h2>
+<h1 align="center"><a href="https://devpost.com/software/book-me-ro24lj">View the Devpost Project</a></h1>
