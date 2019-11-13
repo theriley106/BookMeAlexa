@@ -47,9 +47,9 @@ Our costs:
 
 This means that our total cost per call is **$0.014623** or less than 2 cents per call.
 
-Consumable Price: **$0.99**
-Amazon Fee (30%): **~$0.30**
-Our Costs: **~$0.02**
+- Consumable Price: **$0.99**
+- Amazon Fee (30%): **~$0.30**
+- Our Costs: **~$0.02**
 
 Total Profit: **~$0.67/call**
 
