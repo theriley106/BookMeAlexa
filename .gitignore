@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 keys.py
 *.zip
+filesToZip/
