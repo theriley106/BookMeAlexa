@@ -1,8 +1,8 @@
-![user flow](https://raw.githubusercontent.com/theriley106/BookMeAlexa/master/static/image1.png?token=AE5MVIN4ME5PAMUIYCZTJQC52QVZC)
-
 ## What it does
 
 **Book Me enables users to book reservations at *any* local restaurant using their Amazon Alexa by placing an automated phone call on their behalf.**
+
+![user flow](https://raw.githubusercontent.com/theriley106/BookMeAlexa/master/static/image1.png?token=AE5MVIN4ME5PAMUIYCZTJQC52QVZC)
 
 ## Technical Details
 
