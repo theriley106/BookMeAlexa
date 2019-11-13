@@ -1,7 +1,5 @@
 <h1 align="center"><a href="https://www.youtube.com/watch?v=oCiOAlz5b8w">Watch the Video Demo</a></h1>
 
-<h2 align="center"><a href="https://devpost.com/software/book-me-ro24lj">View the Devpost Project</a></h2>
-
 ## What it does
 
 **Book Me enables users to book reservations at *any* local restaurant using their Amazon Alexa by placing an automated phone call on their behalf.**
@@ -54,3 +52,5 @@ Amazon Fee (30%): **~$0.30**
 Our Costs: **~$0.02**
 
 Total Profit: **~$0.67/call**
+
+<h2 align="center"><a href="https://devpost.com/software/book-me-ro24lj">View the Devpost Project</a></h2>
