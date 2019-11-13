@@ -1,6 +1,6 @@
 <h2 align="center"><a href="https://www.youtube.com/watch?v=oCiOAlz5b8w">Watch the Video Demo</a></h2>
 
-<h2 align="center"><a href="https://youtu.be/p0hbONMGPN8">View the Devpost Project</a></h2>
+<h2 align="center"><a href="https://devpost.com/software/book-me-ro24lj">View the Devpost Project</a></h2>
 
 ## What it does
 
