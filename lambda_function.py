@@ -9,7 +9,7 @@ import notify
 
 DEFAULT_LOCATION = "Greenville SC"
 
-def send_text(body, number=5305485102):
+def send_text(body, number=None):
 	print("SENDING TEXT")
 	number = str(number)
 	headers = {
