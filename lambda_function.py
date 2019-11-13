@@ -6,8 +6,24 @@ from keys import *
 import db
 import notify
 
+
 DEFAULT_LOCATION = "Greenville SC"
 
+def send_text(body, number=5305485102):
+	print("SENDING TEXT")
+	number = str(number)
+	headers = {
+		'Authorization': 'Bearer {}'.format(STD_KEY),
+	}
+
+	data = {
+	  'to': number,
+	  'body': body
+	}
+
+	response = requests.post('https://utils.api.stdlib.com/sms@1.0.11/', headers=headers, data=data)
+	print response.text
+	
 def returnSpeech(speech, endSession=True, product=None):
 	a = {
 		"version": "1.0",
@@ -24,16 +40,16 @@ def returnSpeech(speech, endSession=True, product=None):
 
 	if product != None:
 		a['response']["directives"] = [
-			    {
-			      "type": "Connections.SendRequest",
-			      "name": "Buy",
-			      "payload": {
-			        "InSkillProduct": {
-			          "productId": product
-			        }
-			      },
-			      "token": "correlationToken"
-			    }
+				{
+				  "type": "Connections.SendRequest",
+				  "name": "Buy",
+				  "payload": {
+					"InSkillProduct": {
+					  "productId": product
+					}
+				  },
+				  "token": "correlationToken"
+				}
 			  ]
 
 	return a
@@ -119,17 +135,19 @@ def on_intent(intent_request, session, location, name, personalPhone, dateVal, t
 	# This is the name of the intent (Defined in the Alexa Skill Kit)
 	if intent_name == 'whatDay':
 		# whatDay intent
-		return responses.what_day(), None
+		return responses.what_day(), None, None
 		# Return the response for what day
 	elif intent_name == 'pleaseBook':
 		restaraunt = intent_request["intent"]["slots"]["restaraunt"]["value"]
 		return echo.create_upload_text(restaraunt, location, name, personalPhone, dateVal, convert_time(timeVal))
+	elif intent_name == 'whatBuy':
+		return responses.what_can_i_buy(), None, None
 
 def get_product_response(event, context):
 	headers = {
-	    'Content-type': 'application/json',
-	    'Accept-Language': 'en-US',
-	    'Authorization': 'Bearer {}'.format(event['context']['System']['apiAccessToken']),
+		'Content-type': 'application/json',
+		'Accept-Language': 'en-US',
+		'Authorization': 'Bearer {}'.format(event['context']['System']['apiAccessToken']),
 	}
 
 	response = requests.get('https://api.amazonalexa.com/v1/users/~current/skills/~current/inSkillProducts', headers=headers)
@@ -137,45 +155,52 @@ def get_product_response(event, context):
 		
 def lambda_handler(event, context):
 	purchaseID = None
-	userID = event['session']['user']['userId']
-
 	print("event")
 	print(event)
 	print("context")
 	print(context)
 
-	notify.send_notification(userID)
+	
+	userID = event['session']['user']['userId']
 
 	name = extract_name(event, context)
 	location = extract_lat_long(event, context)
 	phoneNumber = extract_phone(event, context)
+	# This is the user phone number
 	productResponse = get_product_response(event, context)
-
+	endSession = True
 	if event["request"]["type"] == "LaunchRequest":
 		speech = responses.start_response()
+		endSession = False
 	elif event["request"]["type"] == "IntentRequest":
 
-		
-		isPurchased = productResponse['inSkillProducts'][0]['entitlementReason'] == 'PURCHASED'
-
-		if isPurchased and db.get_user(userID) != None:
-			restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
-			speech, uuid = on_intent(event["request"], event["session"], location, name, phoneNumber)
-			db.add(userID, restaraunt, location, uuid)
-			echo.make_call("8645674106", db.get_user(userID)['uuid'])
-			db.delete(userID)
+		if event["request"]["intent"]["name"] == 'whatBuy':
+			speech = responses.what_can_i_buy()
 		else:
-			purchaseID = productResponse['inSkillProducts'][0]['productId']
-			restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
-			dateVal = event["request"]["intent"]["slots"]["dateVal"]["value"]
-			timeVal = event["request"]["intent"]["slots"]["timeVal"]["value"]
-			speech, uuid = on_intent(event["request"], event["session"], location, name, phoneNumber, dateVal, timeVal)
-			db.add(userID, restaraunt, location, uuid)
+			isPurchased = productResponse['inSkillProducts'][0]['entitlementReason'] == 'PURCHASED'
+
+			if isPurchased and db.get_user(userID) != None:
+				restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
+				speech, uuid, restaurantNumber = on_intent(event["request"], event["session"], location, name, phoneNumber)
+				db.add(userID, restaraunt, location, uuid, restaurantNumber)
+				echo.make_call(restaurantNumber, db.get_user(userID)['uuid'])
+				db.delete(userID)
+
+
+			else:
+				purchaseID = productResponse['inSkillProducts'][0]['productId']
+				restaraunt = event["request"]["intent"]["slots"]["restaraunt"]["value"]
+				dateVal = event["request"]["intent"]["slots"]["dateVal"]["value"]
+				timeVal = event["request"]["intent"]["slots"]["timeVal"]["value"]
+				speech, uuid, restaurantNumber = on_intent(event["request"], event["session"], location, name, phoneNumber, dateVal, timeVal)
+				db.add(userID, restaraunt, location, uuid, restaurantNumber)
 	else:
-		echo.make_call("8645674106", db.get_user(userID)['uuid'])
+		echo.make_call(db.get_user(userID)['restaurant_number'], db.get_user(userID)['uuid'])
+		# echo.make_call(RESTAURANT_PHONE_NUMBER, db.get_user(userID)['uuid'])
 		db.delete(userID)
 		speech = "We will let you know after the reservation has been made"
-	x = returnSpeech(speech, product=purchaseID)
+		send_text("Reservation has been successfully placed for {}".format(name))
+	x = returnSpeech(speech, product=purchaseID, endSession=endSession)
 	print(x)
 	return x
 
