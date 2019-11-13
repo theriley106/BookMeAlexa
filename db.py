@@ -7,8 +7,8 @@ client = pymongo.MongoClient(MONGO_STRING)
 
 db = client.blog
 
-def add(userID, query, location, uuid):
-	db.posts.insert_one({"user": userID, "query": query, 'location': location, "uuid": uuid})
+def add(userID, query, location, uuid, restaurant_number=None):
+	db.posts.insert_one({"user": userID, "query": query, 'location': location, "uuid": uuid, restaurant_number: restaurant_number})
 
 def read():
 	for post in db.posts.find():
